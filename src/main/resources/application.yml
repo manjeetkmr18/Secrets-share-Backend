@@ -1,0 +1,113 @@
+spring:
+  application:
+    name: OnePassLink
+    author:
+      name: "Manjeet Kumar"
+
+  # Active profiles
+  profiles:
+    active: dev  # Enable dev profile for easier development
+
+  # Redis Configuration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # Jackson Configuration
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: UTC
+    date-format: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+
+  # Server Configuration
+  server:
+    port: ${SERVER_PORT:8080}
+    error:
+      include-message: never
+      include-binding-errors: never
+      include-stacktrace: never
+      include-exception: false
+    compression:
+      enabled: true
+      mime-types: application/json,text/plain,text/css,application/javascript
+      min-response-size: 1024
+
+# Management/Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+  health:
+    redis:
+      enabled: true
+
+# OpenAPI/Swagger Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  show-actuator: false
+
+# Logging Configuration
+logging:
+  level:
+    com.OnePassLink.backend: ${LOG_LEVEL:INFO}
+    org.springframework.data.redis: WARN
+    org.springframework.security: WARN
+    io.lettuce.core: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${LOG_FILE:logs/onepasslink.log}
+    max-size: 10MB
+    max-history: 30
+
+# Application-specific Configuration
+app:
+  security:
+    rate-limit:
+      enabled: ${RATE_LIMIT_ENABLED:true}
+      requests-per-minute: ${RATE_LIMIT_RPM:10}
+      burst-limit: ${RATE_LIMIT_BURST:20}
+
+  secret:
+    max-size-bytes: ${SECRET_MAX_SIZE:102400} # 100KB
+    min-ttl-seconds: ${SECRET_MIN_TTL:60}     # 1 minute
+    max-ttl-seconds: ${SECRET_MAX_TTL:604800} # 7 days
+    default-ttl-seconds: ${SECRET_DEFAULT_TTL:86400} # 24 hours
+
+  title: "OnePassLink API"
+  version: "1.0.0"
+  description: "Secure one-time secret sharing service with zero-knowledge architecture"

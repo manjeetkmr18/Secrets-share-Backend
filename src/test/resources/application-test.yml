@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: OnePassLink-Test
+
+  # Test Redis Configuration (using embedded or testcontainers)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 1  # Use different database for tests
+      timeout: 1000ms
+
+  # Test Jackson Configuration
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: UTC
+
+  # Test Server Configuration
+  server:
+    port: 0  # Random port for tests
+
+# Test Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: false
+
+# Test Logging Configuration
+logging:
+  level:
+    com.OnePassLink.backend: DEBUG
+    org.springframework.data.redis: INFO
+    org.testcontainers: INFO
+    org.springframework.test: INFO
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Test Application Configuration
+app:
+  security:
+    rate-limit:
+      enabled: true
+      requests-per-minute: 100  # Higher limit for tests
+      burst-limit: 200
+
+  secret:
+    max-size-bytes: 1024      # Smaller for tests
+    min-ttl-seconds: 1        # Faster expiry for tests
+    max-ttl-seconds: 300      # 5 minutes max for tests
+    default-ttl-seconds: 60   # 1 minute default for tests

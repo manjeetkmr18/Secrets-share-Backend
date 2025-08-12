@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProfile name="!prod">
+        <!-- Development/Test Console Appender -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <!-- Production File Appender -->
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_FILE:-logs/onepasslink.log}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>logs/onepasslink.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <maxFileSize>10MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
+
+        <!-- JSON Appender for structured logging -->
+        <appender name="JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_FILE:-logs/onepasslink-json.log}</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>logs/onepasslink-json.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <maxFileSize>10MB</maxFileSize>
+                <maxHistory>30</maxHistory>
+                <totalSizeCap>1GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <timestamp/>
+                    <logLevel/>
+                    <loggerName/>
+                    <message/>
+                    <mdc/>
+                    <arguments/>
+                </providers>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="JSON"/>
+        </root>
+    </springProfile>
+
+    <!-- Security: Never log request bodies or sensitive data -->
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="WARN"/>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="WARN"/>
+
+    <!-- Reduce Redis connection noise -->
+    <logger name="io.lettuce.core" level="WARN"/>
+    <logger name="org.springframework.data.redis" level="WARN"/>
+
+    <!-- Application specific loggers -->
+    <logger name="com.OnePassLink.backend.api" level="INFO"/>
+    <logger name="com.OnePassLink.backend.service" level="INFO"/>
+    <logger name="com.OnePassLink.backend.repository" level="INFO"/>
+
+    <!-- Security events should be logged -->
+    <logger name="com.OnePassLink.backend.util.RateLimiter" level="INFO"/>
+</configuration>

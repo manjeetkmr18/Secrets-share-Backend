@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: OnePassLink
+  profiles:
+    active: docker
+
+  # Redis Configuration for Docker
+  data:
+    redis:
+      host: redis
+      port: 6379
+      database: 0
+      timeout: 2000ms
+
+  # Jackson Configuration
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: UTC
+
+  # Server Configuration
+  server:
+    port: 8080
+
+# Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# Logging for Docker
+logging:
+  level:
+    com.OnePassLink.backend: INFO
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# App Configuration
+app:
+  security:
+    rate-limit:
+      enabled: true
+      requests-per-minute: 10
+      burst-limit: 20
+  secret:
+    max-size-bytes: 102400
+    min-ttl-seconds: 60
+    max-ttl-seconds: 604800
+    default-ttl-seconds: 86400
